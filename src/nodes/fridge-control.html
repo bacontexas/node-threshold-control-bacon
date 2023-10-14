@@ -1,1 +1,141 @@
+<script type="text/javascript">
+
+    function isPositive(value) {
+      return value >= 0;
+    }
+
+    function validatePositiveNumber(value) {
+      if (isNaN(value)) {
+        return false;
+      }
+      return isPositive(Number(value));
+    }
+
+    RED.nodes.registerType('fridge-control',{
+        category: 'function',
+        paletteLabel: 'Fridge Control',
+        color: '#f7ab3e',
+        defaults: {
+            name:           {value: ""},
+            onPayload:      {value: true, validate:RED.validators.typedInput('payloadOnType')},
+            payloadOnType:  {value: 'bool'},
+            offPayload:     {value: false, validate:RED.validators.typedInput('payloadOffType')},
+            payloadOffType: {value: 'bool'},
+            onThreshold:    {value: "", validate:RED.validators.number()},
+            offThreshold:   {value: "", validate:RED.validators.number()},
+            onDelay:        {value: 5, validate:validatePositiveNumber},
+            offDelay:       {value: 5, validate:validatePositiveNumber}
+        },
+        inputs: 1,
+        outputs: 3,
+        icon: "victronenergy.svg",
+        label: function() {
+            return this.name||"Fridge Control";
+        },
+        oneditprepare: function() {
+          var optionNothing = { value: "nul", label: "Nothing", hasValue: false};
+
+          $('#node-input-onPayload').typedInput({
+            default: 'bool',
+            typeField: $("#node-input-payloadOnType"),
+            types: ['str','num','bool','json','bin','re','date','env', optionNothing]
+          });
+
+          $('#node-input-offPayload').typedInput({
+            default: 'bool',
+            typeField: $("#node-input-payloadOffType"),
+            types: ['msg','str','num','bool','json','bin','re','date','env', optionNothing]
+          });
+        }
+    });
+</script>
+
+<script type="text/html" data-template-name="fridge-control">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+      <label for="node-input-onPayload"><i class="fa fa-tag"></i> On payload</label>
+      <input style="width:70%" type="text" id="node-input-onPayload">
+      <input type="hidden" id="node-input-payloadOnType">
+    </div>
+    <div class="form-row">
+      <label for="node-input-offPayload"><i class="fa fa-tag"></i> Off payload</label>
+      <input style="width:70%" type="text" id="node-input-offPayload">
+      <input type="hidden" id="node-input-payloadOffType">
+    </div>
+    <div class="form-row">
+        <label for="node-input-onThreshold"><i class="fa fa-id-card"></i> On threshold</label>
+        <input type="text" id="node-input-onThreshold" placeholder="ON threshold" required>
+    </div>
+    <div class="form-row">
+        <label for="node-input-offThreshold"><i class="fa fa-id-card"></i> Off threshold</label>
+        <input type="text" id="node-input-offThreshold" placeholder="OFF threshold" required>
+    </div>
+    <div class="form-row">
+        <label for="node-input-onDelay"><i class="fa fa-id-card"></i> On delay</label>
+        <input type="text" id="node-input-onDelay" placeholder="ON delay" required>
+    </div>
+    <div class="form-row">
+        <label for="node-input-offDelay"><i class="fa fa-id-card"></i> Off delay</label>
+        <input type="text" id="node-input-offDelay" placeholder="OFF delay" required>
+    </div>
+</script>
+
+<script type="text/html" data-help-name="fridge-control">
+  <p>With the treshold control you can enable or disable a delayed output when the input
+    passes the or or off threshold. 
+  </p>
+
+  <h3>Configuration</h3>
+
+  <p>There are a few values that need configuration before the node can be used:</p>
+
+  <ul>
+    <li><i>On output</i> - The <tt>msg.payload</tt> to send when the on threshold get passed (and the counter reaches zero).</li>
+    <li><i>Off output</i> - The <tt>msg.payload</tt> to send when the off threshold get passed (and the counter reaches zero).</li>
+    <li><i>On threshold</i> - As soon as this threshold gets passed by <tt>msg.payload</tt>, the <i>onDelay</i> counter counts down to zero. If that hass passed, a "on" <tt>msg.payload</tt> gets send to the first output.</i></li>
+    <li><i>Off threshold</i> - As soon as this threshold gets passed by <tt>msg.payload</tt>, the <i>offDelay</i> counter counts down to zero. If that hass passed, a "off" <tt>msg.payload</tt> gets send to the first output.</i></li>
+    <li><i>On delay</i> - the delay in seconds that is waited before the output gets send after the input passes the on threshold.</li>
+    <li><i>Off delay</i> - the delay in seconds that is waited before the output gets send after the input passes the off threshold.</li>
+  </ul>
+
+  <p>The on threshold should be higher than the off threshold.</p>
+
+  <p>Note that the delay is in whole seconds. It rounds it to the nearest integer when input is not in whole seconds.</p>
+
+  <h3>Input</h3>
+
+  <p>By default the node listens to <tt>msg.payload</tt> as input.</p>
+
+  <p>It also listens to different messages, which can change the configured values:</p>
+
+  <ul>
+    <li><tt>msg.onThreshold</tt> - The on threshold</li>
+    <li><tt>msg.offThreshold</tt> - The off threshold</li>
+    <li><tt>msg.onDelay</tt> - The on delay in seconds</li>
+    <li><tt>msg.offDelay</tt> - The off delay in seconds</li>
+  </ul>
+
+  <h3>Outputs</h3>
+
+  <p>There are three outputs. The first one just gives "on" or "off" (after the delay has passed).</p>
+
+  <p>The second output gives the state of the counter for the on delay. It also give a <tt>msg.blink</tt> for even and odd counter values.</p>
+
+  <p>The third output gives the state of the couter for the off delay. It also give a <tt>msg.blink</tt> for even and odd counter values.</p>
+
+  <h3>Status</h3>
+
+  <p>The status node tries to show the current state. It can turn red on wrong input and on the "off" state,
+    green on the "on" state and yellow when the on or off counter is running.
+  </p>
+
+  <p>
+  When you do a fresh deploy and then inject values within the hysteresis region (between on and off thresholds) the Node status will be displayed as "unknown"
+  with a blue dot.
+  </p>
+
+</script>
 
