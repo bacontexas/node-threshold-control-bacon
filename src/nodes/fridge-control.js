@@ -1,7 +1,7 @@
 module.exports = function (RED) {
   'use strict'
 
-  function ThresholdControl (config) {
+  function FridgeControl (config) {
     RED.nodes.createNode(this, config)
 
     const node = this
