@@ -11,26 +11,26 @@
       return isPositive(Number(value));
     }
 
-    RED.nodes.registerType('threshold-control',{
+    RED.nodes.registerType('fridge-control',{
         category: 'function',
-        paletteLabel: 'Threshold control',
+        paletteLabel: 'Fridge Control',
         color: '#f7ab3e',
         defaults: {
-            name: {value: ""},
-            onPayload: {value: true, validate:RED.validators.typedInput('payloadOnType')},
-            payloadOnType: {value: 'bool'},
-            offPayload: {value: false, validate:RED.validators.typedInput('payloadOffType')},
+            name:           {value: ""},
+            onPayload:      {value: true, validate:RED.validators.typedInput('payloadOnType')},
+            payloadOnType:  {value: 'bool'},
+            offPayload:     {value: false, validate:RED.validators.typedInput('payloadOffType')},
             payloadOffType: {value: 'bool'},
-            onThreshold: {value: "", validate:RED.validators.number()},
-            offThreshold: {value: "", validate:RED.validators.number()},
-            onDelay: {value: 5, validate:validatePositiveNumber},
-            offDelay: {value: 5, validate:validatePositiveNumber}
+            onThreshold:    {value: "", validate:RED.validators.number()},
+            offThreshold:   {value: "", validate:RED.validators.number()},
+            onDelay:        {value: 5, validate:validatePositiveNumber},
+            offDelay:       {value: 5, validate:validatePositiveNumber}
         },
         inputs: 1,
         outputs: 3,
         icon: "victronenergy.svg",
         label: function() {
-            return this.name||"Threshold control";
+            return this.name||"Fridge Control";
         },
         oneditprepare: function() {
           var optionNothing = { value: "nul", label: "Nothing", hasValue: false};
@@ -50,7 +50,7 @@
     });
 </script>
 
-<script type="text/html" data-template-name="threshold-control">
+<script type="text/html" data-template-name="fridge-control">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -83,7 +83,7 @@
     </div>
 </script>
 
-<script type="text/html" data-help-name="threshold-control">
+<script type="text/html" data-help-name="fridge-control">
   <p>With the treshold control you can enable or disable a delayed output when the input
     passes the or or off threshold. 
   </p>
